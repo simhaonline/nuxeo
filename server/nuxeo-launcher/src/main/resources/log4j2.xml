@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<Configuration shutdownHook="disable">
+  <!--
+    Nuxeo Launcher log4j2 configuration file (aka nuxeoctl).
+    We define two console appenders, one for stdout and one for stderr.
+    When using nuxeo in console mode and an exit signal is received (ctrl+c), console output becomes the stderr output,
+    thus the need of two appenders.
+    The CONSOLE_ERR appender has a ContextMapFilter in order to print only logs coming from the shutdown thread.
+  -->
   <Appenders>
     <Console name="CONSOLE" target="SYSTEM_OUT">
       <ThresholdFilter level="DEBUG" onMatch="ACCEPT" />
-      <PatternLayout pattern="%m%n" />
+      <PatternLayout>
+        <MarkerPatternSelector defaultPattern="%m%n">
+          <PatternMatch key="NO_NEW_LINE" pattern="%m"/>
+        </MarkerPatternSelector>
+      </PatternLayout>
+    </Console>
+    <Console name="CONSOLE_ERR" target="SYSTEM_ERR">
+      <ContextMapFilter onMatch="ACCEPT">
+        <KeyValuePair key="ShutdownHook" value="true"/>
+      </ContextMapFilter>
+      <PatternLayout>
+        <MarkerPatternSelector defaultPattern="%m%n">
+          <PatternMatch key="NO_NEW_LINE" pattern="%m"/>
+        </MarkerPatternSelector>
+      </PatternLayout>
     </Console>
     <RollingFile name="FILE" fileName="${sys:nuxeo.log.dir}/console.log"
                  filePattern="${sys:nuxeo.log.dir}/console-%d{yyyy-MM-dd}.log.gz" append="true">
@@ -27,6 +48,7 @@
     <Logger name="org.apache.commons.vfs2.impl.StandardFileSystemManager" level="warn" />
     <Root level="warn">
       <AppenderRef ref="CONSOLE" />
+      <AppenderRef ref="CONSOLE_ERR" />
       <AppenderRef ref="FILE" />
     </Root>
   </Loggers>
