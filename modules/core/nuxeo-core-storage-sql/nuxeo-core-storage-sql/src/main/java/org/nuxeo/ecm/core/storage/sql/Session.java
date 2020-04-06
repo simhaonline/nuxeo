@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.resource.cci.Connection;
-
 import org.nuxeo.ecm.core.api.IterableQueryResult;
 import org.nuxeo.ecm.core.api.PartialList;
 import org.nuxeo.ecm.core.api.ScrollResult;
@@ -37,7 +35,10 @@ import org.nuxeo.ecm.core.query.QueryFilter;
  *
  * @author Florent Guillaume
  */
-public interface Session extends Connection {
+public interface Session extends AutoCloseable {
+
+    @Override
+    void close();
 
     /**
      * Gets the low-level Mapper for this session.
@@ -45,13 +46,6 @@ public interface Session extends Connection {
      * @return the mapper
      */
     Mapper getMapper();
-
-    /**
-     * Checks if the session is live (not closed).
-     *
-     * @return {@code true} if the session is live
-     */
-    boolean isLive();
 
     /**
      * Gets the session repository name.
