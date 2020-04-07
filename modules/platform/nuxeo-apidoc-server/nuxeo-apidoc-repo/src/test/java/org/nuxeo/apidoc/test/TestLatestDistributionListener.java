@@ -42,7 +42,7 @@ import org.nuxeo.runtime.test.runner.TransactionalFeature;
  * @since 8.3
  */
 @RunWith(FeaturesRunner.class)
-@Features(RuntimeSnaphotFeature.class)
+@Features(RuntimeSnaphotRepoFeature.class)
 public class TestLatestDistributionListener {
 
     @Inject

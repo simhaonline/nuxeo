@@ -20,6 +20,7 @@ package org.nuxeo.apidoc.snapshot;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.nuxeo.apidoc.api.BundleGroup;
 import org.nuxeo.apidoc.api.BundleInfo;
@@ -38,8 +39,10 @@ import org.nuxeo.apidoc.introspection.OperationInfoImpl;
 import org.nuxeo.apidoc.introspection.RuntimeSnapshot;
 import org.nuxeo.apidoc.introspection.ServerInfo;
 import org.nuxeo.apidoc.introspection.ServiceInfoImpl;
+import org.nuxeo.apidoc.plugin.PluginSnapshot;
 import org.nuxeo.ecm.automation.OperationDocumentation;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -153,6 +156,26 @@ public interface DistributionSnapshot extends DistributionSnapshotDesc {
      */
     ServerInfo getServerInfo();
 
+    /**
+     * Returns the Json mapper for reading/writing the snapshot in json format.
+     *
+     * @since 11.1
+     */
+    @JsonIgnore
+    ObjectMapper getJsonMapper();
+
+    @JsonIgnore
+    ObjectWriter getJsonWriter();
+
+    @JsonIgnore
+    ObjectReader getJsonReader();
+
+    Map<String, PluginSnapshot<?>> getPluginSnapshots();
+
+    /**
+     * @deprecated since 11.1, use non-static @link #getJsonMapper()} to get the non-static writer handling plugins.
+     */
+    @Deprecated
     static ObjectWriter jsonWriter() throws IOException {
         return jsonMapper().writerFor(DistributionSnapshot.class)
                            .withoutRootName()
@@ -160,6 +183,10 @@ public interface DistributionSnapshot extends DistributionSnapshotDesc {
                            .without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
     }
 
+    /**
+     * @deprecated since 11.1, use non-static @link #getJsonMapper()} to get the non-static reader handling plugins.
+     */
+    @Deprecated
     static ObjectReader jsonReader() throws IOException {
         return jsonMapper().readerFor(DistributionSnapshot.class)
                            .withoutRootName()
@@ -184,4 +211,5 @@ public interface DistributionSnapshot extends DistributionSnapshotDesc {
     static abstract class OperationDocParamMixin {
         abstract @JsonProperty("isRequired") String isRequired();
     }
+
 }

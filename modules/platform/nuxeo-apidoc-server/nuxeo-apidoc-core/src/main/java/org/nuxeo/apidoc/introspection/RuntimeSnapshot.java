@@ -40,7 +40,10 @@ import org.nuxeo.apidoc.api.ExtensionPointInfo;
 import org.nuxeo.apidoc.api.OperationInfo;
 import org.nuxeo.apidoc.api.ServiceInfo;
 import org.nuxeo.apidoc.documentation.JavaDocHelper;
+import org.nuxeo.apidoc.plugin.Plugin;
+import org.nuxeo.apidoc.plugin.PluginSnapshot;
 import org.nuxeo.apidoc.snapshot.DistributionSnapshot;
+import org.nuxeo.apidoc.snapshot.SnapshotManager;
 import org.nuxeo.ecm.automation.AutomationService;
 import org.nuxeo.ecm.automation.OperationDocumentation;
 import org.nuxeo.ecm.automation.OperationException;
@@ -51,6 +54,12 @@ import org.nuxeo.runtime.api.Framework;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class RuntimeSnapshot extends BaseNuxeoArtifact implements DistributionSnapshot {
 
@@ -86,23 +95,29 @@ public class RuntimeSnapshot extends BaseNuxeoArtifact implements DistributionSn
 
     protected final List<Class<?>> spi = new ArrayList<>();
 
+    protected boolean pluginSnapshotsInitialized = false;
+
+    protected final Map<String, PluginSnapshot<?>> pluginSnapshots = new HashMap<>();
+
     public static RuntimeSnapshot build() {
         return new RuntimeSnapshot();
     }
 
     @JsonCreator
     private RuntimeSnapshot(@JsonProperty("serverInfo") ServerInfo serverInfo,
-            @JsonProperty("creationDate") Date created, @JsonProperty("operations") List<OperationInfo> operations) {
+            @JsonProperty("creationDate") Date created, @JsonProperty("operations") List<OperationInfo> operations,
+            @JsonProperty("pluginSnapshots") Map<String, PluginSnapshot<?>> pluginSnapshots) {
         this.serverInfo = serverInfo;
         this.created = created;
         index();
         this.operations.addAll(operations);
+        opsInitialized = true;
+        this.pluginSnapshots.putAll(pluginSnapshots);
     }
 
     protected RuntimeSnapshot() {
         serverInfo = ServerInfo.build();
         created = new Date();
-
         index();
     }
 
@@ -221,7 +236,6 @@ public class RuntimeSnapshot extends BaseNuxeoArtifact implements DistributionSn
             BundleGroupImpl bGroup = buildBundleGroup(grpId, serverInfo.getVersion());
             bundleGroups.add(bGroup);
         }
-
     }
 
     protected BundleGroupImpl buildBundleGroup(String id, String version) {
@@ -465,7 +479,7 @@ public class RuntimeSnapshot extends BaseNuxeoArtifact implements DistributionSn
         return null;
     }
 
-    public void initOperations() {
+    protected void initOperations() {
         if (opsInitialized) {
             return;
         }
@@ -550,4 +564,48 @@ public class RuntimeSnapshot extends BaseNuxeoArtifact implements DistributionSn
     public boolean isHidden() {
         return false;
     }
+
+    protected List<Plugin<?>> getPlugins() {
+        return Framework.getService(SnapshotManager.class).getPlugins();
+    }
+
+    @Override
+    public ObjectMapper getJsonMapper() {
+        ObjectMapper mapper = DistributionSnapshot.jsonMapper();
+        for (Plugin<?> plugin : getPlugins()) {
+            mapper = plugin.getJsonMapper(mapper);
+        }
+        return mapper;
+    }
+
+    @Override
+    public ObjectWriter getJsonWriter() {
+        return getJsonMapper().writerFor(DistributionSnapshot.class)
+                              .withoutRootName()
+                              .with(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM)
+                              .without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+    }
+
+    @Override
+    public ObjectReader getJsonReader() {
+        return getJsonMapper().readerFor(DistributionSnapshot.class)
+                              .withoutRootName()
+                              .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+                              .with(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
+    }
+
+    protected void initPluginSnapshots() {
+        if (pluginSnapshotsInitialized) {
+            return;
+        }
+        getPlugins().forEach(plugin -> pluginSnapshots.put(plugin.getId(), plugin.getRuntimeSnapshot()));
+        pluginSnapshotsInitialized = true;
+    }
+
+    @Override
+    public Map<String, PluginSnapshot<?>> getPluginSnapshots() {
+        initPluginSnapshots();
+        return Collections.unmodifiableMap(pluginSnapshots);
+    }
+
 }

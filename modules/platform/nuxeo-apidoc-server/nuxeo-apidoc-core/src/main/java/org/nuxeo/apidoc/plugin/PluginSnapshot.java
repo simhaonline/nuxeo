@@ -16,19 +16,26 @@
  * Contributors:
  *     Anahide Tchertchian
  */
-package org.nuxeo.apidoc.test;
+package org.nuxeo.apidoc.plugin;
 
-import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.RunnerFeature;
-import org.nuxeo.runtime.test.runner.RuntimeFeature;
+import java.util.List;
+
+import org.nuxeo.apidoc.api.NuxeoArtifact;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
+ * Snapshot managed by a plugin
+ *
  * @since 11.1
  */
-@Features(RuntimeFeature.class)
-@Deploy("org.nuxeo.apidoc.core")
-@Deploy("org.nuxeo.apidoc.repo")
-public class RuntimeSnaphotFeature implements RunnerFeature {
+public interface PluginSnapshot<T extends NuxeoArtifact> {
+
+    @JsonIgnore
+    List<String> getItemIds();
+
+    List<T> getItems();
+
+    T getItem(String id);
 
 }

@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import org.nuxeo.apidoc.documentation.DocumentationService;
 import org.nuxeo.apidoc.export.ArchiveFile;
 import org.nuxeo.apidoc.listener.AttributesExtractorStater;
+import org.nuxeo.apidoc.plugin.Plugin;
 import org.nuxeo.apidoc.snapshot.DistributionSnapshot;
 import org.nuxeo.apidoc.snapshot.DistributionSnapshotDesc;
 import org.nuxeo.apidoc.snapshot.SnapshotFilter;
@@ -110,41 +111,37 @@ public class Distribution extends ModuleRoot {
     }
 
     public String getNavigationPoint() {
-        String currentUrl = getContext().getURL();
-        String navPoint = null;
-
-        if (currentUrl.contains("/listBundles")) {
-            navPoint = "listBundles";
-        } else if (currentUrl.contains("/listComponents")) {
-            navPoint = "listComponents";
-        } else if (currentUrl.contains("/listServices")) {
-            navPoint = "listServices";
-        } else if (currentUrl.contains("/listExtensionPoints")) {
-            navPoint = "listExtensionPoints";
-        } else if (currentUrl.contains("/listContributions")) {
-            navPoint = "listContributions";
-        } else if (currentUrl.contains("/listBundleGroups")) {
-            navPoint = "listBundleGroups";
-        } else if (currentUrl.contains("/viewBundleGroup")) {
-            navPoint = "viewBundleGroup";
-        } else if (currentUrl.contains("/viewComponent")) {
-            navPoint = "viewComponent";
-        } else if (currentUrl.contains("/viewService")) {
-            navPoint = "viewService";
-        } else if (currentUrl.contains("/viewExtensionPoint")) {
-            navPoint = "viewExtensionPoint";
-        } else if (currentUrl.contains("/viewContribution")) {
-            navPoint = "viewContribution";
-        } else if (currentUrl.contains("/viewBundle")) {
-            navPoint = "viewBundle";
-        } else if (currentUrl.contains("/listOperations")) {
-            navPoint = "listOperations";
-        } else if (currentUrl.contains("/viewOperation")) {
-            navPoint = "viewOperation";
-        } else if (currentUrl.contains("/doc")) {
-            navPoint = "documentation";
+        String url = getContext().getURL();
+        String point = null;
+        if (url.contains("/listBundleGroups") || url.contains("/viewBundleGroup")) {
+            point = "listBundleGroups";
+        } else if (url.contains("/listBundles") || url.contains("/viewBundle")) {
+            point = "listBundles";
+        } else if (url.contains("/listComponents") || url.contains("/viewComponent")) {
+            point = "listComponents";
+        } else if (url.contains("/listServices") || url.contains("/viewService")) {
+            point = "listServices";
+        } else if (url.contains("/listExtensionPoints") || url.contains("/viewExtensionPoint")) {
+            point = "listExtensionPoints";
+        } else if (url.contains("/listContributions") || url.contains("/viewContribution")) {
+            point = "listContributions";
+        } else if (url.contains("/listOperations") || url.contains("/viewOperation")) {
+            point = "listOperations";
+        } else if (url.contains("/documentation")) {
+            point = "documentation";
         }
-        return navPoint;
+        if (point == null) {
+            // check plugins
+            List<Plugin<?>> plugins = getSnapshotManager().getPlugins();
+            for (Plugin<?> plugin : plugins) {
+                point = plugin.getView(url);
+                if (point != null) {
+                    break;
+                }
+            }
+        }
+
+        return point;
     }
 
     @GET
@@ -558,4 +555,15 @@ public class Distribution extends ModuleRoot {
     public static boolean isSiteMode() {
         return Framework.isBooleanPropertyTrue("org.nuxeo.apidoc.site.mode");
     }
+
+    /**
+     * Generates the list of plugins that should be displayed in the menu.
+     */
+    public List<Plugin<?>> getPluginMenu() {
+        return getSnapshotManager().getPlugins()
+                                   .stream()
+                                   .filter(plugin -> !plugin.isHidden())
+                                   .collect(Collectors.toList());
+    }
+
 }

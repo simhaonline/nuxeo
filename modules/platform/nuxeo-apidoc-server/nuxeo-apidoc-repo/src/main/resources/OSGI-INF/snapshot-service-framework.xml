@@ -6,4 +6,12 @@
     <provide interface="org.nuxeo.apidoc.snapshot.SnapshotManager" />
   </service>
 
+  <extension-point name="plugins">
+    <documentation>
+      A plugin can introspect and persist information related to the current runtime environment.
+      <code>TODO: sample</code>
+    </documentation>
+    <object class="org.nuxeo.apidoc.plugin.PluginDescriptor" />
+  </extension-point>
+
 </component>

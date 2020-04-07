@@ -36,20 +36,20 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
  * @since 8.3
  */
 @RunWith(FeaturesRunner.class)
-@Features(RuntimeSnaphotFeature.class)
+@Features(RuntimeSnaphotRepoFeature.class)
 public class TestJson {
 
     @Test
     public void canSerializeAndReadBack() throws IOException {
         try (ByteArrayOutputStream sink = new ByteArrayOutputStream()) {
-            DistributionSnapshot.jsonWriter().writeValue(sink, RuntimeSnapshot.build());
+            RuntimeSnapshot snap = RuntimeSnapshot.build();
+            snap.getJsonWriter().writeValue(sink, snap);
             try (OutputStream file = Files.newOutputStream(Paths.get(FeaturesRunner.getBuildDirectory() + "/test.json"),
                     StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
                 file.write(sink.toByteArray());
             }
             try (ByteArrayInputStream source = new ByteArrayInputStream(sink.toByteArray())) {
-                DistributionSnapshot snapshot = DistributionSnapshot.jsonReader()
-                                                                    .<DistributionSnapshot> readValue(source);
+                DistributionSnapshot snapshot = snap.getJsonReader().readValue(source);
                 Assertions.assertThat(snapshot).isNotNull();
                 Assertions.assertThat(snapshot.getBundle("org.nuxeo.apidoc.repo")).isNotNull();
             }

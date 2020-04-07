@@ -55,7 +55,7 @@ import org.xml.sax.SAXException;
  * @since 8.3
  */
 @RunWith(FeaturesRunner.class)
-@Features(RuntimeSnaphotFeature.class)
+@Features(RuntimeSnaphotRepoFeature.class)
 public class TestExtractor {
 
     protected List<String> checks = Arrays.asList("usersocialworkspaces", "socialworkspaceactivitystream",

@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,10 @@ import org.nuxeo.apidoc.api.QueryHelper;
 import org.nuxeo.apidoc.api.ServiceInfo;
 import org.nuxeo.apidoc.documentation.JavaDocHelper;
 import org.nuxeo.apidoc.introspection.ServerInfo;
+import org.nuxeo.apidoc.plugin.Plugin;
+import org.nuxeo.apidoc.plugin.PluginSnapshot;
 import org.nuxeo.apidoc.snapshot.DistributionSnapshot;
+import org.nuxeo.apidoc.snapshot.SnapshotManager;
 import org.nuxeo.common.utils.Path;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -49,6 +53,14 @@ import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.api.PropertyException;
 import org.nuxeo.ecm.core.query.sql.NXQL;
+import org.nuxeo.runtime.api.Framework;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class RepositoryDistributionSnapshot extends BaseNuxeoArtifactDocAdapter implements DistributionSnapshot {
 
@@ -431,4 +443,41 @@ public class RepositoryDistributionSnapshot extends BaseNuxeoArtifactDocAdapter 
     public ServerInfo getServerInfo() {
         throw new UnsupportedOperationException();
     }
+
+    protected List<Plugin<?>> getPlugins() {
+        return Framework.getService(SnapshotManager.class).getPlugins();
+    }
+
+    @Override
+    public ObjectMapper getJsonMapper() {
+        ObjectMapper mapper = DistributionSnapshot.jsonMapper();
+        for (Plugin<?> plugin : getPlugins()) {
+            mapper = plugin.getJsonMapper(mapper);
+        }
+        return mapper;
+    }
+
+    @Override
+    public ObjectWriter getJsonWriter() {
+        return getJsonMapper().writerFor(RepositoryDistributionSnapshot.class)
+                              .withoutRootName()
+                              .with(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM)
+                              .without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+    }
+
+    @Override
+    public ObjectReader getJsonReader() {
+        return getJsonMapper().readerFor(RepositoryDistributionSnapshot.class)
+                              .withoutRootName()
+                              .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+                              .with(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
+    }
+
+    @Override
+    public Map<String, PluginSnapshot<?>> getPluginSnapshots() {
+        Map<String, PluginSnapshot<?>> res = new HashMap<>();
+        getPlugins().forEach(plugin -> res.put(plugin.getId(), plugin.getRepositorySnapshot(getDoc())));
+        return res;
+    }
+
 }
