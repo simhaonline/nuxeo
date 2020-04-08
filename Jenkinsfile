@@ -184,6 +184,7 @@ def buildUnitTestStage(env) {
               jx step helm install ${HELM_CHART_REPOSITORY_NAME}/${HELM_CHART_NUXEO} \
                 --name=${TEST_HELM_CHART_RELEASE} \
                 --namespace=${testNamespace} \
+                --version=1.0.6-PR-11-2 \
                 ${testValues}
             """
             // wait for Redis to be ready
@@ -420,7 +421,8 @@ pipeline {
                   --name=${TEST_HELM_CHART_RELEASE} \
                   --namespace=${testNamespace} \
                   --set-file=ci/helm/nuxeo-test-base-values.yaml~gen \
-                  --set-file=ci/helm/nuxeo-test-kafka-values.yaml~gen
+                  --set-file=ci/helm/nuxeo-test-kafka-values.yaml~gen \
+                  --version=1.0.6-PR-11-2 \
               """
               // wait for Redis to be ready
               sh """
