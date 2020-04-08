@@ -163,7 +163,7 @@ public abstract class TestAutomation {
         params.clear();
         params.put("blobProviderName", "test");
         params.put("nbThreads", nbThreads);
-        params.put("logBlobInfo", "blob-info");
+        params.put("logBlobInfo", "import/blob-info");
         addExtraParams(params);
         automationService.run(ctx, BlobConsumers.ID, params);
 
@@ -171,7 +171,7 @@ public abstract class TestAutomation {
         params.clear();
         params.put("nbDocuments", nbDocuments);
         params.put("nbThreads", nbThreads);
-        params.put("logBlobInfo", "blob-info");
+        params.put("logBlobInfo", "import/blob-info");
         addExtraParams(params);
         automationService.run(ctx, RandomDocumentProducers.ID, params);
 
@@ -223,7 +223,7 @@ public abstract class TestAutomation {
         params.clear();
         params.put("blobProviderName", "test");
         params.put("nbThreads", nbThreads);
-        params.put("logBlobInfo", "blob-info");
+        params.put("logBlobInfo", "import/blob-info");
         addExtraParams(params);
         automationService.run(ctx, BlobConsumers.ID, params);
 
@@ -232,7 +232,7 @@ public abstract class TestAutomation {
         params.put("nbDocuments", nbDocuments);
         params.put("nbThreads", nbThreads);
         params.put("countFolderAsDocument", false);
-        params.put("logBlobInfo", "blob-info");
+        params.put("logBlobInfo", "import/blob-info");
         addExtraParams(params);
         automationService.run(ctx, RandomDocumentProducers.ID, params);
 
