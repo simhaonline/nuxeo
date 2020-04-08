@@ -288,6 +288,7 @@ pipeline {
     TEST_ELASTICSEARCH_RESOURCE = "${TEST_HELM_CHART_RELEASE}-elasticsearch-client"
     TEST_KAFKA_RESOURCE = "${TEST_HELM_CHART_RELEASE}-kafka"
     TEST_KAFKA_PORT = '9092'
+    TEST_KAFKA_POD_NAME = "${TEST_KAFKA_RESOURCE}-0"
     TEST_DEFAULT_ROLLOUT_STATUS_TIMEOUT = '1m'
      // Elasticsearch and Kafka might take longer
     TEST_LONG_ROLLOUT_STATUS_TIMEOUT = '3m'
@@ -395,26 +396,79 @@ pipeline {
 
     stage('Run runtime unit tests') {
       steps {
-        setGitHubBuildStatus('platform/utests/runtime/dev', 'Unit tests - runtime', 'PENDING')
         container('maven') {
-          echo """
-          ----------------------------------------
-          Run runtime unit tests
-          ----------------------------------------"""
-          dir('modules/runtime') {
-            sh "mvn ${MAVEN_ARGS} test"
+          script {
+            setGitHubBuildStatus('platform/utests/runtime', 'Unit tests - runtime', 'PENDING')
+            def testNamespace = "${TEST_NAMESPACE_PREFIX}-runtime"
+            def redisHost = "${TEST_REDIS_RESOURCE}.${testNamespace}.${TEST_SERVICE_DOMAIN_SUFFIX}"
+            def kafkaHost = "${TEST_KAFKA_RESOURCE}.${testNamespace}.${TEST_SERVICE_DOMAIN_SUFFIX}:${TEST_KAFKA_PORT}"
+            try {
+              echo """
+              ----------------------------------------
+              Run runtime unit tests
+              ----------------------------------------"""
+
+              echo "runtime unit tests: install external services"
+              // initialize Helm without Tiller and add local repository
+              sh """
+                helm init --client-only
+                helm repo add ${HELM_CHART_REPOSITORY_NAME} ${HELM_CHART_REPOSITORY_URL}
+              """
+              // install the nuxeo Helm chart into a dedicated namespace that will be cleaned up afterwards
+              sh """
+                jx step helm install ${HELM_CHART_REPOSITORY_NAME}/${HELM_CHART_NUXEO} \
+                  --name=${TEST_HELM_CHART_RELEASE} \
+                  --namespace=${testNamespace} \
+                  --set-file=ci/helm/nuxeo-test-base-values.yaml~gen \
+                  --set-file=ci/helm/nuxeo-test-kafka-values.yaml~gen
+              """
+              // wait for Redis to be ready
+              sh """
+                kubectl rollout status statefulset ${TEST_REDIS_RESOURCE} \
+                  --namespace=${testNamespace} \
+                  --timeout=${TEST_DEFAULT_ROLLOUT_STATUS_TIMEOUT}
+              """
+              // wait for Kafka to be ready
+              sh """
+                kubectl rollout status statefulset ${TEST_KAFKA_RESOURCE} \
+                  --namespace=${testNamespace} \
+                  --timeout=${TEST_LONG_ROLLOUT_STATUS_TIMEOUT}
+              """
+
+              echo "runtime unit tests: run Maven"
+              // run unit tests
+              sh """
+                cd modules/runtime
+                mvn ${MAVEN_ARGS} \
+                  -Dnuxeo.test.redis.host=${redisHost} \
+                  -Pkafka -Dkafka.bootstrap.servers=${kafkaHost} \
+                  test
+              """
+
+              setGitHubBuildStatus('platform/utests/runtime', 'Unit tests - runtime', 'SUCCESS')
+            } catch(err) {
+              setGitHubBuildStatus('platform/utests/runtime', 'Unit tests - runtime', 'FAILURE')
+              throw err
+            } finally {
+              try {
+                junit testResults: "**/target/surefire-reports/*.xml"
+                // archive Kafka logs
+                def kafkaLogFile = 'nuxeo-stream-kafka.log'
+                sh "kubectl logs ${TEST_KAFKA_POD_NAME} --namespace=${testNamespace} > ${kafkaLogFile}"
+                archiveArtifacts allowEmptyArchive: true, artifacts: "${kafkaLogFile}"
+              } finally {
+                echo "runtime unit tests: clean up test namespace"
+                // uninstall the nuxeo Helm chart
+                sh """
+                  jx step helm delete ${TEST_HELM_CHART_RELEASE} \
+                    --namespace=${testNamespace} \
+                    --purge
+                """
+                // clean up the test namespace
+                sh "kubectl delete namespace ${testNamespace} --ignore-not-found=true"
+              }
+            }
           }
-        }
-      }
-      post {
-        always {
-          junit testResults: '**/target/surefire-reports/*.xml'
-        }
-        success {
-          setGitHubBuildStatus('platform/utests/runtime/dev', 'Unit tests - runtime', 'SUCCESS')
-        }
-        failure {
-          setGitHubBuildStatus('platform/utests/runtime/dev', 'Unit tests - runtime', 'FAILURE')
         }
       }
     }
