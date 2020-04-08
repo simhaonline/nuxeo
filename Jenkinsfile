@@ -335,6 +335,11 @@ pipeline {
     }
 
     stage('Update version') {
+      when {
+        expression {
+          return false
+        }
+      }
       steps {
         container('maven') {
           echo """
@@ -357,6 +362,9 @@ pipeline {
         not {
           branch 'PR-*'
         }
+        expression {
+          return false
+        }
       }
       steps {
         container('maven') {
@@ -374,6 +382,11 @@ pipeline {
     }
 
     stage('Compile') {
+      when {
+        expression {
+          return false
+        }
+      }
       steps {
         setGitHubBuildStatus('platform/compile', 'Compile', 'PENDING')
         container('maven') {
@@ -440,7 +453,7 @@ pipeline {
               echo "runtime unit tests: run Maven"
               // run unit tests
               sh """
-                cd modules/runtime
+                cd modules/runtime/nuxeo-stream
                 mvn ${MAVEN_ARGS} \
                   -Dnuxeo.test.redis.host=${redisHost} \
                   -Pkafka -Dkafka.bootstrap.servers=${kafkaHost} \
