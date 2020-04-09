@@ -368,6 +368,11 @@ pipeline {
     }
 
     stage('Run runtime unit tests') {
+      when {
+        not {
+          branch 'PR-*'
+        }
+      }
       steps {
         setGitHubBuildStatus('platform/utests/runtime/dev', 'Unit tests - runtime', 'PENDING')
         container('maven') {
@@ -394,6 +399,11 @@ pipeline {
     }
 
     stage('Run unit tests') {
+      when {
+        not {
+          branch 'PR-*'
+        }
+      }
       steps {
         script {
           def stages = [:]
@@ -436,6 +446,9 @@ pipeline {
           Run "dev" functional tests
           ----------------------------------------"""
           runFunctionalTests('ftests')
+          sh """
+            echo "Test ERROR Ftest"  >> /ftests/nuxeo-drive-ftests/target/tomcat/log/server.log
+          """
         }
       }
       post {
@@ -453,6 +466,11 @@ pipeline {
     }
 
     stage('Build Docker images') {
+      when {
+        not {
+          branch 'PR-*'
+        }
+      }
       steps {
         setGitHubBuildStatus('platform/docker/build', 'Build Docker images', 'PENDING')
         container('maven') {
@@ -479,6 +497,11 @@ pipeline {
     }
 
     stage('Test Docker images') {
+      when {
+        not {
+          branch 'PR-*'
+        }
+      }
       steps {
         setGitHubBuildStatus('platform/docker/test', 'Test Docker images', 'PENDING')
         container('maven') {
@@ -587,6 +610,11 @@ pipeline {
     }
 
     stage('Deploy Maven artifacts') {
+      when {
+        not {
+          branch 'PR-*'
+        }
+      }
       steps {
         setGitHubBuildStatus('platform/deploy', 'Deploy Maven artifacts', 'PENDING')
         container('maven') {
@@ -608,6 +636,11 @@ pipeline {
     }
 
     stage('Upload Nuxeo Packages') {
+      when {
+        not {
+          branch 'PR-*'
+        }
+      }
       steps {
         setGitHubBuildStatus('platform/upload/packages', 'Upload Nuxeo Packages', 'PENDING')
         container('maven') {
@@ -692,9 +725,8 @@ pipeline {
 
     stage('JSF pipeline') {
       when {
-        expression {
-          // only trigger JSF pipeline if the target branch is master or a maintenance branch
-          return CHANGE_TARGET ==~ 'master|\\d+\\.\\d+'
+        not {
+          branch 'PR-*'
         }
       }
       steps {
