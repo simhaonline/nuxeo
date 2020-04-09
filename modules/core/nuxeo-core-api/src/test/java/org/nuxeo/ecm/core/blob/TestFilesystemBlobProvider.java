@@ -133,7 +133,7 @@ public class TestFilesystemBlobProvider {
     }
 
     @Test
-    @LogCaptureFeature.FilterOn(logLevel = "ERROR")
+    @LogCaptureFeature.FilterOn(logLevel = "WARN")
     @ConsoleLogLevelThreshold("FATAL")
     public void testReadNotFound() throws Exception {
         String path = "/NO_SUCH_FILE_EXISTS";
@@ -151,7 +151,7 @@ public class TestFilesystemBlobProvider {
         assertEquals(0, bytes.length);
         List<String> caughtEvents = logCaptureResult.getCaughtEventMessages();
         assertEquals(1, caughtEvents.size());
-        assertEquals("Failed to access file: testfs:/NO_SUCH_FILE_EXISTS", caughtEvents.get(0));
+        assertEquals("Failed to access blob: testfs:/NO_SUCH_FILE_EXISTS", caughtEvents.get(0));
     }
 
     @Test
@@ -180,7 +180,7 @@ public class TestFilesystemBlobProvider {
     }
 
     @Test
-    @LogCaptureFeature.FilterOn(logLevel = "ERROR")
+    @LogCaptureFeature.FilterOn(logLevel = "WARN")
     public void testIllegalPath() throws Exception {
         String illegalPath = "../foo";
 
@@ -205,7 +205,7 @@ public class TestFilesystemBlobProvider {
             assertEquals(0, bytes.length);
             List<String> caughtEvents = logCaptureResult.getCaughtEventMessages();
             assertEquals(1, caughtEvents.size());
-            assertEquals("Failed to access file: testfs2:../foo", caughtEvents.get(0));
+            assertEquals("Failed to access blob: testfs2:../foo", caughtEvents.get(0));
         } finally {
             ((BlobManagerComponent) blobManager).unregisterBlobProvider(descr);
         }
