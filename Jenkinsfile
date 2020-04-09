@@ -83,10 +83,12 @@ String getDockerTagFrom(String version) {
 
 void runFunctionalTests(String baseDir) {
   try {
-    sh "mvn ${MAVEN_ARGS} -f ${baseDir}/pom.xml verify"
+    sh """
+      eval mvn ${MAVEN_ARGS} -e -X -f ${baseDir}/pom.xml verify 2>&1 | tee $WORKSPACE/ftests.log
+      """
   } finally {
     try {
-      archiveArtifacts allowEmptyArchive: true, artifacts: "${baseDir}/**/target/failsafe-reports/*, ${baseDir}/**/target/**/*.log, ${baseDir}/**/target/*.png, ${baseDir}/**/target/**/distribution.properties, ${baseDir}/**/target/**/configuration.properties"
+      archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/ftests.log, ${baseDir}/**/target/failsafe-reports/*, ${baseDir}/**/target/**/*.log, ${baseDir}/**/target/*.png, ${baseDir}/**/target/**/distribution.properties, ${baseDir}/**/target/**/configuration.properties"
     } catch (err) {
       echo hudson.Functions.printThrowable(err)
     }
@@ -447,7 +449,7 @@ pipeline {
           ----------------------------------------"""
           runFunctionalTests('ftests')
           sh """
-            echo "Test ERROR Ftest"  >> /ftests/nuxeo-drive-ftests/target/tomcat/log/server.log
+            echo "Test ERROR Ftest"  >> $WORKSPACE/ftests/nuxeo-drive-ftests/target/tomcat/log/server.log
           """
         }
       }
