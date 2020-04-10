@@ -18,6 +18,7 @@
  */
 package org.nuxeo.apidoc.repository;
 
+import org.nuxeo.apidoc.api.NuxeoArtifact;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentRef;
@@ -57,7 +58,7 @@ public class UnrestrictedRootCreator extends UnrestrictedSessionRunner {
     public void run() {
 
         DocumentModel root = session.createDocumentModel(parentPath, name, "Workspace");
-        root.setProperty("dublincore", "title", name);
+        root.setPropertyValue(NuxeoArtifact.TITLE_PROPERTY_PATH, name);
         root = session.createDocument(root);
 
         if (setAcl) {
