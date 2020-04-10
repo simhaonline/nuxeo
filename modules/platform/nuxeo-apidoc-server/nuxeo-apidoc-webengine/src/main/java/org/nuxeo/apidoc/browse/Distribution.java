@@ -113,22 +113,29 @@ public class Distribution extends ModuleRoot {
     public String getNavigationPoint() {
         String url = getContext().getURL();
         String point = null;
-        if (url.contains("/listBundleGroups") || url.contains("/viewBundleGroup")) {
-            point = "listBundleGroups";
-        } else if (url.contains("/listBundles") || url.contains("/viewBundle")) {
-            point = "listBundles";
-        } else if (url.contains("/listComponents") || url.contains("/viewComponent")) {
-            point = "listComponents";
-        } else if (url.contains("/listServices") || url.contains("/viewService")) {
-            point = "listServices";
-        } else if (url.contains("/listExtensionPoints") || url.contains("/viewExtensionPoint")) {
-            point = "listExtensionPoints";
-        } else if (url.contains("/listContributions") || url.contains("/viewContribution")) {
-            point = "listContributions";
-        } else if (url.contains("/listOperations") || url.contains("/viewOperation")) {
-            point = "listOperations";
-        } else if (url.contains("/documentation")) {
-            point = "documentation";
+        if (ApiBrowserConstants.check(url, ApiBrowserConstants.LIST_BUNDLEGROUPS)
+                || ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_BUNDLEGROUP)) {
+            point = ApiBrowserConstants.LIST_BUNDLEGROUPS;
+        } else if (ApiBrowserConstants.check(url, ApiBrowserConstants.LIST_BUNDLES)
+                || ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_BUNDLE)) {
+            point = ApiBrowserConstants.LIST_BUNDLES;
+        } else if (ApiBrowserConstants.check(url, ApiBrowserConstants.LIST_COMPONENTS)
+                || ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_COMPONENT)) {
+            point = ApiBrowserConstants.LIST_COMPONENTS;
+        } else if (ApiBrowserConstants.check(url, ApiBrowserConstants.LIST_SERVICES)
+                || ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_SERVICE)) {
+            point = ApiBrowserConstants.LIST_SERVICES;
+        } else if (ApiBrowserConstants.check(url, ApiBrowserConstants.LIST_EXTENSIONPOINTS)
+                || ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_EXTENSIONPOINT)) {
+            point = ApiBrowserConstants.LIST_EXTENSIONPOINTS;
+        } else if (ApiBrowserConstants.check(url, ApiBrowserConstants.LIST_CONTRIBUTIONS)
+                || ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_CONTRIBUTION)) {
+            point = ApiBrowserConstants.LIST_CONTRIBUTIONS;
+        } else if (ApiBrowserConstants.check(url, ApiBrowserConstants.LIST_OPERATIONS)
+                || ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_OPERATION)) {
+            point = ApiBrowserConstants.LIST_OPERATIONS;
+        } else if (ApiBrowserConstants.check(url, ApiBrowserConstants.VIEW_DOCUMENTATION)) {
+            point = ApiBrowserConstants.VIEW_DOCUMENTATION;
         }
         if (point == null) {
             // check plugins
@@ -549,11 +556,11 @@ public class Distribution extends ModuleRoot {
     }
 
     public static boolean showCurrentDistribution() {
-        return !(Framework.isBooleanPropertyTrue("org.nuxeo.apidoc.hide.current.distribution") || isSiteMode());
+        return !(Framework.isBooleanPropertyTrue(ApiBrowserConstants.PROPERTY_SITE_MODE) || isSiteMode());
     }
 
     public static boolean isSiteMode() {
-        return Framework.isBooleanPropertyTrue("org.nuxeo.apidoc.site.mode");
+        return Framework.isBooleanPropertyTrue(ApiBrowserConstants.PROPERTY_SITE_MODE);
     }
 
     /**
