@@ -192,7 +192,7 @@ public class TestLogKafka extends TestLog {
         assertTrue(tailer1.assignments().isEmpty());
         LogRecord<KeyValueMessage> record;
         try {
-            tailer1.read(Duration.ofSeconds(2));
+            tailer1.read(Duration.ofSeconds(10));
             fail("Should have raise a rebalance exception");
         } catch (RebalanceException e) {
             // expected
@@ -202,7 +202,7 @@ public class TestLogKafka extends TestLog {
         assertEquals(NB_QUEUE, tailer1.assignments().size());
         // read NB_QUEUE msg and commit
         for (int i = 0; i < NB_QUEUE; i++) {
-            record = tailer1.read(Duration.ofSeconds(1));
+            record = tailer1.read(Duration.ofSeconds(10));
             assertNotNull(record);
             assertEquals(msg1, record.message());
         }
