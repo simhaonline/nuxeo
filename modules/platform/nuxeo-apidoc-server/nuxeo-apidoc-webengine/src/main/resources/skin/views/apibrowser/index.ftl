@@ -14,22 +14,22 @@
 
 <ul class="apibrowser">
  <ul>
-   <li class="bundles">
+   <li class="bundlestree">
      <a href="${Root.path}/${distId}/listBundleGroups">Bundle groups</a>
      <ul>
-       <li class="bundle">
+       <li class="bundletree">
          <a href="${Root.path}/${distId}/listBundles">Bundles</a>
          <ul>
            <li class="component">
              <a href="${Root.path}/${distId}/listComponents">Components</a>
              <ul>
-               <li class="service">
+               <li class="servicetree">
                  <a href="${Root.path}/${distId}/listServices">Services</a>
                </li>
-               <li class="extension">
+               <li class="extensiontree">
                  <a href="${Root.path}/${distId}/listExtensionPoints">Extension points</a>
                </li>
-               <li class="contribution">
+               <li class="contributiontree">
                  <a href="${Root.path}/${distId}/listContributions">Contributions</a>
                </li>
              </ul>
@@ -38,6 +38,14 @@
        </li>
      </ul>
    </li>
+   <li class="operationstree">
+     <a href="${Root.path}/${distId}/listOperations">Operations</a>
+   </li>
+   <#list Root.getPluginMenu() as plugin>
+     <li class="${plugin.getStyleClass()}tree">
+       <a href="${Root.path}/${distId}/${plugin.getViewType()}/${plugin.getHomeView()}">${plugin.getLabel()}</a>
+     </li>
+   </#list>
  </ul>
 </ul>
 
