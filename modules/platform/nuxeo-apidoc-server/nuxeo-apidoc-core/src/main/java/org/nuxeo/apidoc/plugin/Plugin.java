@@ -18,9 +18,6 @@
  */
 package org.nuxeo.apidoc.plugin;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.nuxeo.apidoc.api.NuxeoArtifact;
@@ -85,13 +82,29 @@ public interface Plugin<T extends NuxeoArtifact> {
      */
     ObjectMapper getJsonMapper(ObjectMapper parent);
 
-    void persist(DistributionSnapshot snapshot, CoreSession session, DocumentModel root, String label,
-            SnapshotFilter filter, Map<String, Serializable> properties);
+    /**
+     * Persists this plugin introspection of the live instance as Nuxeo documents.
+     * <p>
+     * The plugin live introspection can be retrieved on the given distribution using
+     * {@link DistributionSnapshot#getPluginSnapshots()#getId()}.
+     * <p>
+     * Can do nothing if no persistence is planned.
+     */
+    void persist(DistributionSnapshot snapshot, CoreSession session, DocumentModel root, SnapshotFilter filter);
 
+    /**
+     * Allows initializing the plugin web context, in case a request is needed to introspect resources.
+     */
     void initWebContext(DistributionSnapshot snapshot, HttpServletRequest request);
 
+    /**
+     * Returns the runtime "live" exploration of resources for this plugin.
+     */
     PluginSnapshot<T> getRuntimeSnapshot();
 
+    /**
+     * Returns the persisted exploration of resources for this plugin.
+     */
     PluginSnapshot<T> getRepositorySnapshot(DocumentModel root);
 
 }

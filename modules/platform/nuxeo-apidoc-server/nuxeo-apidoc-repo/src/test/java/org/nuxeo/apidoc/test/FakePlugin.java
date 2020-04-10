@@ -18,9 +18,6 @@
  */
 package org.nuxeo.apidoc.test;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import org.nuxeo.apidoc.plugin.AbstractPlugin;
 import org.nuxeo.apidoc.plugin.PluginDescriptor;
 import org.nuxeo.apidoc.plugin.PluginSnapshot;
@@ -39,8 +36,7 @@ public class FakePlugin extends AbstractPlugin<FakeNuxeoArtifact> {
     }
 
     @Override
-    public void persist(DistributionSnapshot snapshot, CoreSession session, DocumentModel root, String label,
-            SnapshotFilter filter, Map<String, Serializable> properties) {
+    public void persist(DistributionSnapshot snapshot, CoreSession session, DocumentModel root, SnapshotFilter filter) {
         throw new UnsupportedOperationException();
     }
 

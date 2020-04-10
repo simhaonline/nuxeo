@@ -136,7 +136,7 @@ public class SnapshotPersister {
 
         // handle plugins persistence
         for (Plugin<?> plugin : plugins) {
-            plugin.persist(snapshot, session, distribContainer.getDoc(), label, filter, properties);
+            plugin.persist(snapshot, session, distribContainer.getDoc(), filter);
         }
 
         // needed for tests
