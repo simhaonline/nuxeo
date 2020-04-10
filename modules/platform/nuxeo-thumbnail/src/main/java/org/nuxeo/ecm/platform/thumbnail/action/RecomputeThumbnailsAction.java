@@ -59,7 +59,7 @@ public class RecomputeThumbnailsAction implements StreamProcessorTopology {
 
     public static final String THUMBNAIL_UPDATED = "thumbnailUpdated";
 
-    public static final String ACTION_NAME = "recomputeThumbnails";
+    public static final String ACTION_NAME = "bulk/recomputeThumbnails";
 
     @Override
     public Topology getTopology(Map<String, String> options) {

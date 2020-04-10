@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.nuxeo.ecm.core.bulk.BulkServiceImpl.BULK_LOG_MANAGER_NAME;
 import static org.nuxeo.ecm.core.bulk.action.SetPropertiesAction.ACTION_NAME;
 import static org.nuxeo.ecm.core.bulk.message.BulkStatus.State.ABORTED;
 import static org.nuxeo.ecm.core.bulk.message.BulkStatus.State.COMPLETED;
@@ -183,7 +182,7 @@ public class TestSetPropertiesAction {
     public void testAbort() throws Exception {
         StreamService streamService = Framework.getService(StreamService.class);
         @SuppressWarnings("resource")
-        LogManager logManager = streamService.getLogManager(BULK_LOG_MANAGER_NAME);
+        LogManager logManager = streamService.getLogManager();
         try (LogTailer<Record> tailer = logManager.createTailer(Name.ofUrn("test"), Name.ofUrn(ACTION_NAME))) {
             tailer.toLastCommitted();
 

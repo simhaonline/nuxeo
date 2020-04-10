@@ -65,7 +65,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class TrashAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "trash";
+    public static final String ACTION_NAME = "bulk/trash";
 
     public static final String PARAM_NAME = "value";
 

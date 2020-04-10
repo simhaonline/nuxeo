@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class DeletionAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "deletion";
+    public static final String ACTION_NAME = "bulk/deletion";
 
     @Override
     public Topology getTopology(Map<String, String> options) {

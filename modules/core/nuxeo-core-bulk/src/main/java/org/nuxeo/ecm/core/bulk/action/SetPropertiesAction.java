@@ -46,7 +46,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class SetPropertiesAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "setProperties";
+    public static final String ACTION_NAME = "bulk/setProperties";
 
     // duplicated from NXAuditEventsService.DISABLE_AUDIT_LOGGER
     public static final String PARAM_DISABLE_AUDIT = "disableAuditLogger";

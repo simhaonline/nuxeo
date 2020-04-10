@@ -23,7 +23,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.nuxeo.ecm.core.bulk.BulkServiceImpl.BULK_LOG_MANAGER_NAME;
 import static org.nuxeo.ecm.core.bulk.BulkServiceImpl.DONE_STREAM_NAME;
 import static org.nuxeo.ecm.core.bulk.message.BulkStatus.State.COMPLETED;
 
@@ -78,7 +77,7 @@ public class TestBulkProcessor {
     @Test
     public void testEmptyQuery() throws InterruptedException {
         @SuppressWarnings("resource")
-        LogManager logManager = stream.getLogManager(BULK_LOG_MANAGER_NAME);
+        LogManager logManager = stream.getLogManager();
         try (LogTailer<Record> tailer = logManager.createTailer(Name.ofUrn("test"), DONE_STREAM_NAME)) {
             tailer.toLastCommitted();
 

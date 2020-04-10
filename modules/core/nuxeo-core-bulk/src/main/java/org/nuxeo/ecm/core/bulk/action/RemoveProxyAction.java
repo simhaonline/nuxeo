@@ -46,7 +46,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class RemoveProxyAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "removeProxy";
+    public static final String ACTION_NAME = "bulk/removeProxy";
 
     public static final String QUERY_TEMPLATE = "SELECT ecm:uuid FROM Document WHERE ecm:isProxy=1 AND ecm:uuid IN ('%s')";
 

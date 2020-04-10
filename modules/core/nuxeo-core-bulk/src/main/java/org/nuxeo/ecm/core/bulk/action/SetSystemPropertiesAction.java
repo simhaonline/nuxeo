@@ -47,7 +47,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class SetSystemPropertiesAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "setSystemProperties";
+    public static final String ACTION_NAME = "bulk/setSystemProperties";
 
     @Override
     public Topology getTopology(Map<String, String> options) {

@@ -37,7 +37,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  * @since 10.3
  */
 public class IndexAction implements StreamProcessorTopology {
-    public static final String ACTION_NAME = "index";
+    public static final String ACTION_NAME = "bulk/index";
 
     public static final String ES_BULK_SIZE_OPTION = "esBulkSizeBytes";
 

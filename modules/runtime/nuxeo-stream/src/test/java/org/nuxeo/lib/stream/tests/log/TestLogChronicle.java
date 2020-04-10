@@ -214,4 +214,12 @@ public class TestLogChronicle extends TestLog {
             assertEquals(msg3, tailer.read(Duration.ofSeconds(1)).message());
         }
     }
+
+    @Test
+    public void testFoo() {
+        for (int i=0; i< 1000; i++) {
+            System.out.println("i = " + i + " -> " + (
+                    i % 10 + 1 )+ "  " + (i << 1));
+        }
+    }
 }

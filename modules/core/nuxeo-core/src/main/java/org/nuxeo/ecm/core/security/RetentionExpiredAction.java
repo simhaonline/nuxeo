@@ -56,7 +56,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class RetentionExpiredAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "retentionExpired";
+    public static final String ACTION_NAME = "retention/retentionExpired";
 
     @Override
     public Topology getTopology(Map<String, String> options) {

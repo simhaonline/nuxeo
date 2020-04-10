@@ -19,6 +19,8 @@
 package org.nuxeo.ecm.restapi.server.jaxrs.search.test.bulk;
 
 import static org.nuxeo.ecm.core.bulk.BulkServiceImpl.STATUS_STREAM;
+import static org.nuxeo.lib.stream.computation.AbstractComputation.INPUT_1;
+import static org.nuxeo.lib.stream.computation.AbstractComputation.OUTPUT_1;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -38,13 +40,13 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class RemoveDocumentAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "removeDocuments";
+    public static final String ACTION_NAME = "bulk/removeDocuments";
 
     @Override
     public Topology getTopology(Map<String, String> options) {
         return Topology.builder()
                        .addComputation(DeleteComputation::new,
-                               Arrays.asList("i1:" + ACTION_NAME, "o1:" + STATUS_STREAM))
+                               Arrays.asList(INPUT_1 + ":" + ACTION_NAME, OUTPUT_1 + ":" + STATUS_STREAM))
                        .build();
     }
 
@@ -57,8 +59,8 @@ public class RemoveDocumentAction implements StreamProcessorTopology {
         @Override
         protected void compute(CoreSession session, List<String> ids, Map<String, Serializable> properties) {
             List<DocumentRef> docRefs = ids.stream()
-                                       .map(IdRef::new)
-                                       .filter(ref -> session.canRemoveDocument(ref))
+                                           .map(IdRef::new)
+                                           .filter(ref -> session.canRemoveDocument(ref))
                                            .collect(Collectors.toList());
             docRefs.forEach(docRef -> session.removeDocument(docRef));
         }

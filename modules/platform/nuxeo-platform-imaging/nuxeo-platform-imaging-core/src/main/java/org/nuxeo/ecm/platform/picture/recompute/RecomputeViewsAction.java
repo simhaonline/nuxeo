@@ -55,7 +55,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class RecomputeViewsAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "recomputeViews";
+    public static final String ACTION_NAME = "bulk/recomputeViews";
 
     public static final String PARAM_XPATH = "xpath";
 

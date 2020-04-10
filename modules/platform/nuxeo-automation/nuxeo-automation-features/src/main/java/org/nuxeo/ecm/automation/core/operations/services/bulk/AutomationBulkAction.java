@@ -54,7 +54,7 @@ public class AutomationBulkAction implements StreamProcessorTopology {
 
     private static final Logger log = LogManager.getLogger(AutomationBulkAction.class);
 
-    public static final String ACTION_NAME = "automation";
+    public static final String ACTION_NAME = "bulk/automation";
 
     public static final String OPERATION_ID = "operationId";
 

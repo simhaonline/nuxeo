@@ -41,7 +41,7 @@ import org.nuxeo.runtime.stream.StreamProcessorTopology;
  */
 public class CSVExportAction implements StreamProcessorTopology {
 
-    public static final String ACTION_NAME = "csvExport";
+    public static final String ACTION_NAME = "bulk/csvExport";
 
     @Override
     public Topology getTopology(Map<String, String> options) {
