@@ -48,6 +48,11 @@ public abstract class AbstractPlugin<T extends NuxeoArtifact> implements Plugin<
     }
 
     @Override
+    public String getPluginSnapshotClass() {
+        return descriptor.getSnapshotClass();
+    }
+
+    @Override
     public String getLabel() {
         return descriptor.getLabel();
     }

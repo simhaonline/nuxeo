@@ -24,6 +24,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -40,6 +47,9 @@ import org.nuxeo.apidoc.snapshot.SnapshotManager;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * @since 11.1
@@ -72,7 +82,9 @@ public class TestPlugin {
     public void testPlugin() {
         Plugin<?> p = snapshotManager.getPlugin("testPlugin");
         assertNotNull(p);
+        assertTrue(p instanceof FakePlugin);
         assertEquals("testPlugin", p.getId());
+        assertEquals(FakePluginRuntimeSnapshot.class.getCanonicalName(), p.getPluginSnapshotClass());
         assertEquals("myType", p.getViewType());
         assertEquals("My snapshot plugin", p.getLabel());
         assertEquals("listItems", p.getHomeView());
@@ -86,8 +98,34 @@ public class TestPlugin {
         PluginSnapshot<?> psnap = snapshot.getPluginSnapshots().get(FakePlugin.ID);
         assertNotNull(psnap);
         assertTrue(psnap instanceof FakePluginRuntimeSnapshot);
-        FakePluginRuntimeSnapshot fpsnap = (FakePluginRuntimeSnapshot) psnap;
-        List<String> itemIds = fpsnap.getItemIds();
+        checkPluginRuntimeSnapshot(snapshot, (FakePluginRuntimeSnapshot) psnap);
+    }
+
+    @Test
+    public void testPluginJson() throws JsonGenerationException, JsonMappingException, IOException {
+        DistributionSnapshot snapshot = snapshotManager.getRuntimeSnapshot();
+
+        // write to output stream
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        snapshot.getJsonWriter().writeValue(out, snapshot);
+
+        try (OutputStream file = Files.newOutputStream(Paths.get(FeaturesRunner.getBuildDirectory() + "/test.json"),
+                StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
+            file.write(out.toByteArray());
+        }
+
+        // read back and explore plugin resources again
+        ByteArrayInputStream source = new ByteArrayInputStream(out.toByteArray());
+        DistributionSnapshot rsnap = snapshot.getJsonReader().readValue(source);
+
+        PluginSnapshot<?> psnap = rsnap.getPluginSnapshots().get(FakePlugin.ID);
+        assertNotNull(psnap);
+        assertTrue(psnap instanceof FakePluginRuntimeSnapshot);
+        checkPluginRuntimeSnapshot(rsnap, (FakePluginRuntimeSnapshot) psnap);
+    }
+
+    protected void checkPluginRuntimeSnapshot(DistributionSnapshot snapshot, FakePluginRuntimeSnapshot psnapshot) {
+        List<String> itemIds = psnapshot.getItemIds();
         assertNotNull(itemIds);
         assertEquals(3, itemIds.size());
         assertEquals("org.nuxeo.apidoc.core", itemIds.get(0));
@@ -97,19 +135,19 @@ public class TestPlugin {
         // get introspected version from one of the bundles (e.g. 11.1-SNAPSHOT when writing this test)
         String version = snapshot.getBundle(snapshot.getBundleIds().get(0)).getArtifactVersion();
 
-        FakeNuxeoArtifact item = fpsnap.getItem(itemIds.get(0));
+        FakeNuxeoArtifact item = psnapshot.getItem(itemIds.get(0));
         assertNotNull(item);
         assertEquals("org.nuxeo.apidoc.core", item.getId());
         assertEquals(BundleInfo.TYPE_NAME, item.getArtifactType());
         assertEquals(version, item.getVersion());
 
-        item = fpsnap.getItem(itemIds.get(1));
+        item = psnapshot.getItem(itemIds.get(1));
         assertNotNull(item);
         assertEquals("org.nuxeo.apidoc.adapterContrib", item.getId());
         assertEquals(ComponentInfo.TYPE_NAME, item.getArtifactType());
         assertEquals(version, item.getVersion());
 
-        item = fpsnap.getItem(itemIds.get(2));
+        item = psnapshot.getItem(itemIds.get(2));
         assertNotNull(item);
         assertEquals("org.nuxeo.apidoc.snapshot.SnapshotManagerComponent--plugins", item.getId());
         assertEquals(ExtensionPointInfo.TYPE_NAME, item.getArtifactType());

@@ -83,6 +83,11 @@ public interface Plugin<T extends NuxeoArtifact> {
     ObjectMapper getJsonMapper(ObjectMapper parent);
 
     /**
+     * XXX
+     */
+    String getPluginSnapshotClass();
+
+    /**
      * Persists this plugin introspection of the live instance as Nuxeo documents.
      * <p>
      * The plugin live introspection can be retrieved on the given distribution using

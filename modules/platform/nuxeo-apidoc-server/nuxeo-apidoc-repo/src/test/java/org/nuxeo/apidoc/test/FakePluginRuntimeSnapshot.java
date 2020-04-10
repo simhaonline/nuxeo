@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.nuxeo.apidoc.plugin.AbstractPluginSnapshot;
 import org.nuxeo.apidoc.plugin.PluginSnapshot;
 import org.nuxeo.apidoc.snapshot.DistributionSnapshot;
 
@@ -32,20 +33,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @since 11.1
  */
-public class FakePluginRuntimeSnapshot implements PluginSnapshot<FakeNuxeoArtifact> {
+public class FakePluginRuntimeSnapshot extends AbstractPluginSnapshot<FakeNuxeoArtifact>
+        implements PluginSnapshot<FakeNuxeoArtifact> {
 
     protected boolean initialized = false;
 
     protected Map<String, FakeNuxeoArtifact> items = new LinkedHashMap<>();
 
-    public FakePluginRuntimeSnapshot() {
-        super();
+    public FakePluginRuntimeSnapshot(String pluginId) {
+        super(pluginId);
     }
 
     @JsonCreator
-    private FakePluginRuntimeSnapshot(@JsonProperty("items") Map<String, FakeNuxeoArtifact> items) {
-        this();
-        this.items.putAll(items);
+    private FakePluginRuntimeSnapshot(@JsonProperty("pluginId") String pluginId,
+            @JsonProperty("items") List<FakeNuxeoArtifact> items) {
+        this(pluginId);
+        items.forEach(item -> this.items.put(item.getId(), item));
     }
 
     public void init(DistributionSnapshot snapshot) {
