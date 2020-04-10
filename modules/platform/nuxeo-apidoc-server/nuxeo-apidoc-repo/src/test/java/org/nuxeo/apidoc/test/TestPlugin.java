@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -29,7 +30,12 @@ import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.apidoc.api.BundleInfo;
+import org.nuxeo.apidoc.api.ComponentInfo;
+import org.nuxeo.apidoc.api.ExtensionPointInfo;
 import org.nuxeo.apidoc.plugin.Plugin;
+import org.nuxeo.apidoc.plugin.PluginSnapshot;
+import org.nuxeo.apidoc.snapshot.DistributionSnapshot;
 import org.nuxeo.apidoc.snapshot.SnapshotManager;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
@@ -72,6 +78,42 @@ public class TestPlugin {
         assertEquals("listItems", p.getHomeView());
         assertEquals("myStyleClass", p.getStyleClass());
         assertFalse(p.isHidden());
+    }
+
+    @Test
+    public void testPluginRuntimeSnapshot() {
+        DistributionSnapshot snapshot = snapshotManager.getRuntimeSnapshot();
+        PluginSnapshot<?> psnap = snapshot.getPluginSnapshots().get(FakePlugin.ID);
+        assertNotNull(psnap);
+        assertTrue(psnap instanceof FakePluginRuntimeSnapshot);
+        FakePluginRuntimeSnapshot fpsnap = (FakePluginRuntimeSnapshot) psnap;
+        List<String> itemIds = fpsnap.getItemIds();
+        assertNotNull(itemIds);
+        assertEquals(3, itemIds.size());
+        assertEquals("org.nuxeo.apidoc.core", itemIds.get(0));
+        assertEquals("org.nuxeo.apidoc.adapterContrib", itemIds.get(1));
+        assertEquals("org.nuxeo.apidoc.snapshot.SnapshotManagerComponent--plugins", itemIds.get(2));
+
+        // get introspected version from one of the bundles (e.g. 11.1-SNAPSHOT when writing this test)
+        String version = snapshot.getBundle(snapshot.getBundleIds().get(0)).getArtifactVersion();
+
+        FakeNuxeoArtifact item = fpsnap.getItem(itemIds.get(0));
+        assertNotNull(item);
+        assertEquals("org.nuxeo.apidoc.core", item.getId());
+        assertEquals(BundleInfo.TYPE_NAME, item.getArtifactType());
+        assertEquals(version, item.getVersion());
+
+        item = fpsnap.getItem(itemIds.get(1));
+        assertNotNull(item);
+        assertEquals("org.nuxeo.apidoc.adapterContrib", item.getId());
+        assertEquals(ComponentInfo.TYPE_NAME, item.getArtifactType());
+        assertEquals(version, item.getVersion());
+
+        item = fpsnap.getItem(itemIds.get(2));
+        assertNotNull(item);
+        assertEquals("org.nuxeo.apidoc.snapshot.SnapshotManagerComponent--plugins", item.getId());
+        assertEquals(ExtensionPointInfo.TYPE_NAME, item.getArtifactType());
+        assertEquals(version, item.getVersion());
     }
 
 }

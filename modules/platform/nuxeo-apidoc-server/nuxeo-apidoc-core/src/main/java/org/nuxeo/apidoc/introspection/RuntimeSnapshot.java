@@ -598,7 +598,7 @@ public class RuntimeSnapshot extends BaseNuxeoArtifact implements DistributionSn
         if (pluginSnapshotsInitialized) {
             return;
         }
-        getPlugins().forEach(plugin -> pluginSnapshots.put(plugin.getId(), plugin.getRuntimeSnapshot()));
+        getPlugins().forEach(plugin -> pluginSnapshots.put(plugin.getId(), plugin.getRuntimeSnapshot(this)));
         pluginSnapshotsInitialized = true;
     }
 

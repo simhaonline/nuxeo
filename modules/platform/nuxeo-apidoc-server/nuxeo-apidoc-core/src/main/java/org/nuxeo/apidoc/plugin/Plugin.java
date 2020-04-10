@@ -99,11 +99,17 @@ public interface Plugin<T extends NuxeoArtifact> {
 
     /**
      * Returns the runtime "live" exploration of resources for this plugin.
+     * <p>
+     * The plugin live introspection can be retrieved on the given distribution using
+     * {@link DistributionSnapshot#getPluginSnapshots()#getId()}.
      */
-    PluginSnapshot<T> getRuntimeSnapshot();
+    PluginSnapshot<T> getRuntimeSnapshot(DistributionSnapshot snapshot);
 
     /**
      * Returns the persisted exploration of resources for this plugin.
+     * <p>
+     * Can return null if no persistence is done via
+     * {@link #persist(DistributionSnapshot, CoreSession, DocumentModel, SnapshotFilter)}.
      */
     PluginSnapshot<T> getRepositorySnapshot(DocumentModel root);
 

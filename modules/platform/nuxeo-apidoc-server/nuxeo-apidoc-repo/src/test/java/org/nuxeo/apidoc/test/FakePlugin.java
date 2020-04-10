@@ -31,23 +31,31 @@ import org.nuxeo.ecm.core.api.DocumentModel;
  */
 public class FakePlugin extends AbstractPlugin<FakeNuxeoArtifact> {
 
+    public static final String ID = "testPlugin";
+
+    protected FakePluginRuntimeSnapshot runtimeSnapshot = new FakePluginRuntimeSnapshot();
+
     public FakePlugin(PluginDescriptor descriptor) {
         super(descriptor);
     }
 
     @Override
     public void persist(DistributionSnapshot snapshot, CoreSession session, DocumentModel root, SnapshotFilter filter) {
-        throw new UnsupportedOperationException();
+        // NOOP
     }
 
     @Override
-    public PluginSnapshot<FakeNuxeoArtifact> getRuntimeSnapshot() {
-        throw new UnsupportedOperationException();
+    public PluginSnapshot<FakeNuxeoArtifact> getRuntimeSnapshot(DistributionSnapshot snapshot) {
+        if (!runtimeSnapshot.initialized) {
+            runtimeSnapshot.init(snapshot);
+        }
+        return runtimeSnapshot;
     }
 
     @Override
     public PluginSnapshot<FakeNuxeoArtifact> getRepositorySnapshot(DocumentModel root) {
-        throw new UnsupportedOperationException();
+        // NOOP
+        return null;
     }
 
 }
