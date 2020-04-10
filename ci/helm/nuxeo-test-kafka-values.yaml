@@ -11,6 +11,8 @@ kafka:
       effect: NoSchedule
   nodeSelector:
     team: platform
+  configurationOverrides:
+    offsets.topic.num.partitions: 5
   zookeeper:
     podLabels:
       branch: $BRANCH_NAME
