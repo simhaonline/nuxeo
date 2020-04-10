@@ -457,7 +457,8 @@ pipeline {
                 mvn ${MAVEN_ARGS} \
                   -Dnuxeo.test.redis.host=${redisHost} \
                   -Pkafka -Dkafka.bootstrap.servers=${kafkaHost} \
-                  test
+                  test \
+                  -Dtest=TestLogStreamProcessorKafka#testProcessorWithMultipleOutputCodec,TestLogKafka#testSubscribe
               """
 
               setGitHubBuildStatus('platform/utests/runtime', 'Unit tests - runtime', 'SUCCESS')
